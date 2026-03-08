@@ -1,87 +1,91 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // =====================================================
-    // DOM Referansları
+    // DOM REFERENCES
     // =====================================================
 
-    // Ekranlar
-    const vaultScreen = document.getElementById('vault-screen');
-    const errorScreen = document.getElementById('error-screen');
+    // Screens
+    const vaultScreen  = document.getElementById('vault-screen');
+    const errorScreen  = document.getElementById('error-screen');
     const appContainer = document.getElementById('app');
 
-    // Kasa Seçim Elemanları
-    const vaultPathInput = document.getElementById('vault-path-input');
-    const vaultOpenBtn = document.getElementById('vault-open-btn');
-    const vaultBrowseBtn = document.getElementById('vault-browse-btn');
-    const savedVaultsSection = document.getElementById('saved-vaults-section');
-    const savedVaultsList = document.getElementById('saved-vaults-list');
-    const vaultStatus = document.getElementById('vault-status');
-    const activeVaultLabel = document.getElementById('active-vault-label');
-    const changeVaultBtn = document.getElementById('change-vault-btn');
+    // Vault selection elements
+    const vaultPathInput       = document.getElementById('vault-path-input');
+    const vaultOpenBtn         = document.getElementById('vault-open-btn');
+    const vaultBrowseBtn       = document.getElementById('vault-browse-btn');
+    const savedVaultsSection   = document.getElementById('saved-vaults-section');
+    const savedVaultsList      = document.getElementById('saved-vaults-list');
+    const vaultStatus          = document.getElementById('vault-status');
+    const activeVaultLabel     = document.getElementById('active-vault-label');
+    const changeVaultBtn       = document.getElementById('change-vault-btn');
 
-    // Hata Ekranı
-    const errorTitle = document.getElementById('error-title');
+    // Error screen
+    const errorTitle   = document.getElementById('error-title');
     const errorMessage = document.getElementById('error-message');
     const errorBackBtn = document.getElementById('error-back-btn');
 
-    // Sol Menü
-    const menuContainer = document.getElementById('menu-container');
-    const tabLibrary = document.getElementById('tab-library');
-    const tabReview = document.getElementById('tab-review');
+    // Sidebar
+    const menuContainer  = document.getElementById('menu-container');
+    const tabLibrary     = document.getElementById('tab-library');
+    const tabReview      = document.getElementById('tab-review');
     const sidebarLibrary = document.getElementById('sidebar-library');
-    const sidebarReview = document.getElementById('sidebar-review');
-    const libraryInfo = document.getElementById('library-info');
-    const reviewInfo = document.getElementById('review-info');
+    const sidebarReview  = document.getElementById('sidebar-review');
+    const libraryInfo    = document.getElementById('library-info');
+    const reviewInfo     = document.getElementById('review-info');
 
-    // Kayıt Yöneticisi
+    // Save manager
     const saveSelector = document.getElementById('save-selector');
-    const newSaveBtn = document.getElementById('new-save-btn');
-    const hiddenCount = document.getElementById('hidden-count');
+    const newSaveBtn   = document.getElementById('new-save-btn');
+    const hiddenCount  = document.getElementById('hidden-count');
     const courseFilters = document.getElementById('course-filters');
 
-    // Tekrar Modu
-    const reviewQuestionTitle = document.getElementById('review-question-title');
-    const reviewQuestionPath = document.getElementById('review-question-path');
-    const reviewImageContainer = document.getElementById('review-image-container');
-    const reviewQuestionImage = document.getElementById('review-question-image');
-    const answerButtons = document.querySelectorAll('.answer-btn');
-    const reviewFeedback = document.getElementById('review-feedback');
-    const showSolutionBtn = document.getElementById('show-solution-btn');
-    const nextQuestionBtn = document.getElementById('next-question-btn');
-    const hideQuestionBtn = document.getElementById('hide-question-btn');
+    // Review mode
+    const reviewQuestionTitle    = document.getElementById('review-question-title');
+    const reviewQuestionPath     = document.getElementById('review-question-path');
+    const reviewImageContainer   = document.getElementById('review-image-container');
+    const reviewQuestionImage    = document.getElementById('review-question-image');
+    const answerButtons          = document.querySelectorAll('.answer-btn');
+    const reviewFeedback         = document.getElementById('review-feedback');
+    const showSolutionBtn        = document.getElementById('show-solution-btn');
+    const nextQuestionBtn        = document.getElementById('next-question-btn');
+    const hideQuestionBtn        = document.getElementById('hide-question-btn');
 
-    // Video Oynatıcı
-    const solutionPlayer = document.getElementById('solution-player');
+    // Video player
+    const solutionPlayer  = document.getElementById('solution-player');
     const videoPlaceholder = document.getElementById('video-placeholder');
-    const videoTitle = document.getElementById('video-title');
-    const videoPathText = document.getElementById('video-path-text');
+    const videoTitle      = document.getElementById('video-title');
+    const videoPathText   = document.getElementById('video-path-text');
 
     // =====================================================
-    // Uygulama Durumu
+    // APPLICATION STATE
     // =====================================================
     const state = {
-        data: null,
-        activeQuestionId: null,
-        currentMode: 'library',
-        saves: { 'save1': [] },
-        currentSave: 'save1',
-        reviewPool: [],
+        data:                  null,
+        activeQuestionId:      null,
+        currentMode:           'library',
+        saves:                 { 'save1': [] },
+        currentSave:           'save1',
+        reviewPool:            [],
         currentReviewQuestion: null,
-        activeVaultPath: null,
+        activeVaultPath:       null,
     };
 
-    // localStorage anahtarları
-    const LS_SAVES = 'yks_saves';
-    const LS_VAULTS = 'yks_vaults';
+    // localStorage keys
+    const LS_SAVES  = 'ql_saves';
+    const LS_VAULTS = 'ql_vaults';
+
+    // One-time setup flags to prevent duplicate event listeners
+    let delegationSetup    = false;
+    let modeListenersSetup = false;
 
     // =====================================================
-    // BAŞLANGIÇ: Kasa Seçim Ekranını Göster
+    // INITIALIZATION
     // =====================================================
     function init() {
         showScreen('vault');
         renderSavedVaults();
 
-        // Son kullanılan kasayı otomatik doldur
+        // Pre-fill the input with the most recently used vault
         const vaults = loadVaultHistory();
         if (vaults.length > 0) {
             vaultPathInput.value = vaults[0];
@@ -89,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // EKRAN YÖNETİMİ
+    // SCREEN MANAGEMENT
     // =====================================================
     function showScreen(screen) {
         vaultScreen.classList.toggle('hidden', screen !== 'vault');
@@ -98,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showError(title, message) {
-        errorTitle.innerHTML = title;
+        errorTitle.innerHTML   = title;
         errorMessage.innerHTML = message;
         showScreen('error');
     }
@@ -109,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =====================================================
-    // KASA GEÇMİŞİ (localStorage)
+    // VAULT HISTORY (localStorage)
     // =====================================================
     function loadVaultHistory() {
         try {
@@ -119,10 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function saveVaultHistory(path) {
+    function saveVaultToHistory(path) {
         let vaults = loadVaultHistory().filter(v => v !== path);
-        vaults.unshift(path); // En başa ekle
-        vaults = vaults.slice(0, 10); // Maks 10 kayıt
+        vaults.unshift(path);          // Most recent first
+        vaults = vaults.slice(0, 10); // Cap at 10 entries
         localStorage.setItem(LS_VAULTS, JSON.stringify(vaults));
     }
 
@@ -132,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // KASA SEÇİM UI
+    // VAULT SELECTION UI
     // =====================================================
     function renderSavedVaults() {
         const vaults = loadVaultHistory();
@@ -145,11 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
         savedVaultsList.innerHTML = '';
 
         vaults.forEach(vaultPath => {
+            const folderName = vaultPath.split(/[\\\/]/).pop() || vaultPath;
             const li = document.createElement('li');
             li.className = 'saved-vault-item';
-
-            const folderName = vaultPath.split(/[\\/]/).pop() || vaultPath;
-
             li.innerHTML = `
                 <button class="saved-vault-open" data-path="${vaultPath}" title="${vaultPath}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,13 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="saved-vault-name">${folderName}</span>
                     <span class="saved-vault-path">${vaultPath}</span>
                 </button>
-                <button class="saved-vault-remove" data-path="${vaultPath}" title="Listeden Kaldır">✕</button>
+                <button class="saved-vault-remove" data-path="${vaultPath}" title="Remove from list">✕</button>
             `;
-
             savedVaultsList.appendChild(li);
         });
 
-        // Olaylar
         savedVaultsList.querySelectorAll('.saved-vault-open').forEach(btn => {
             btn.addEventListener('click', () => openVault(btn.dataset.path));
         });
@@ -181,22 +181,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setVaultStatus(type, message) {
         if (!message) {
-            vaultStatus.className = 'vault-status hidden';
+            vaultStatus.className   = 'vault-status hidden';
             vaultStatus.textContent = '';
             return;
         }
-        vaultStatus.className = `vault-status ${type}`;
+        vaultStatus.className   = `vault-status ${type}`;
         vaultStatus.textContent = message;
     }
 
-    // Gözat Butonu — native klasör seçici
+    // Browse button — opens a native folder picker via the server
     vaultBrowseBtn.addEventListener('click', browseFolder);
 
-    // Kasa Aç Butonu
+    // Open button — opens the typed vault path
     vaultOpenBtn.addEventListener('click', () => {
         const path = vaultPathInput.value.trim();
         if (!path) {
-            setVaultStatus('error', 'Lütfen bir klasör yolu girin.');
+            setVaultStatus('error', 'Please enter a folder path.');
             return;
         }
         openVault(path);
@@ -207,38 +207,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =====================================================
-    // GÖZAT — tkinter üzerinden native klasör seçici
+    // FOLDER BROWSER (native dialog via tkinter)
     // =====================================================
     async function browseFolder() {
-        vaultBrowseBtn.disabled = true;
-        vaultBrowseBtn.textContent = '...';
-        setVaultStatus('loading', 'Klasör seçici açılıyor...');
+        vaultBrowseBtn.disabled     = true;
+        vaultBrowseBtn.textContent  = '...';
+        setVaultStatus('loading', 'Opening folder picker...');
         try {
-            const res = await fetch('/api/browse');
+            const res  = await fetch('/api/browse');
             const data = await res.json();
             if (data.path) {
                 vaultPathInput.value = data.path;
                 setVaultStatus('', '');
                 openVault(data.path);
             } else {
-                // Kullanıcı iptal etti
+                // User cancelled the dialog
                 setVaultStatus('', '');
             }
         } catch (err) {
-            setVaultStatus('error', 'Gözat başarısız: ' + err.message);
+            setVaultStatus('error', 'Browse failed: ' + err.message);
         } finally {
-            vaultBrowseBtn.disabled = false;
-            vaultBrowseBtn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg> Gözat`;
+            vaultBrowseBtn.disabled  = false;
+            vaultBrowseBtn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg> Browse`;
         }
     }
 
-    // Kasa Değiştir Butonu (ana uygulama içinden)
+    // Change Vault button (inside the main app)
     changeVaultBtn.addEventListener('click', () => {
         solutionPlayer.pause();
-        solutionPlayer.src = '';
-        menuContainer.innerHTML = '';
-        courseFilters.innerHTML = '';
-        state.data = null;
+        solutionPlayer.src    = '';
+        menuContainer.innerHTML  = '';
+        courseFilters.innerHTML  = '';
+        state.data            = null;
         state.activeVaultPath = null;
         renderSavedVaults();
         setVaultStatus('', '');
@@ -247,14 +247,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =====================================================
-    // KASA AÇMA VE TARAMA
+    // VAULT OPEN & SCAN
     // =====================================================
     async function openVault(vaultPath) {
         vaultOpenBtn.disabled = true;
-        setVaultStatus('loading', `Taranıyor: ${vaultPath}`);
+        setVaultStatus('loading', `Scanning: ${vaultPath}`);
 
         try {
-            const url = `/api/scan?path=${encodeURIComponent(vaultPath)}`;
+            const url      = `/api/scan?path=${encodeURIComponent(vaultPath)}`;
             const response = await fetch(url);
             const jsonData = await response.json();
 
@@ -263,73 +263,74 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!jsonData || jsonData.length === 0) {
-                throw new Error('Bu klasörde tanınan video dosyası bulunamadı.\n\nBeklenen yapı: KasaKlasörü/Ders/Ünite/video.mp4');
+                throw new Error(
+                    'No recognised video files found in this folder.\n\n' +
+                    'Expected structure: VaultFolder/Course/Unit/video.mp4'
+                );
             }
 
-            // Başarılı — uygulamayı başlat
-            state.data = jsonData;
+            // Success — store state and launch the app
+            state.data            = jsonData;
             state.activeVaultPath = vaultPath;
 
-            saveVaultHistory(vaultPath);
+            saveVaultToHistory(vaultPath);
             renderSavedVaults();
 
             setupApp(jsonData, vaultPath);
 
         } catch (error) {
-            console.error('Kasa açma hatası:', error);
-            setVaultStatus('error', `Hata: ${error.message}`);
+            console.error('Failed to open vault:', error);
+            setVaultStatus('error', `Error: ${error.message}`);
         } finally {
             vaultOpenBtn.disabled = false;
         }
     }
 
     // =====================================================
-    // UYGULAMA KURULUMU (Kasa açıldıktan sonra)
+    // APP SETUP (called after a vault is successfully opened)
     // =====================================================
     function setupApp(data, vaultPath) {
-        // Menüyü sıfırla ve yeniden oluştur
-        menuContainer.innerHTML = '';
-        courseFilters.innerHTML = '';
+        // Reset and rebuild the menu and filters
+        menuContainer.innerHTML  = '';
+        courseFilters.innerHTML  = '';
 
-        buildMenuOptimized(data);
+        buildMenu(data);
         buildCourseFilters(data);
         loadSaves();
         setupEventDelegation();
         setupModeEventListeners();
 
-        // Aktif kasa etiketini güncelle
-        const folderName = vaultPath.split(/[\\/]/).pop() || vaultPath;
+        // Update the active vault label in the sidebar header
+        const folderName = vaultPath.split(/[\\\/]/).pop() || vaultPath;
         activeVaultLabel.textContent = folderName;
-        activeVaultLabel.title = vaultPath;
+        activeVaultLabel.title       = vaultPath;
 
-        // Tekrar modunu sıfırla
         switchMode('library');
-
         showScreen('app');
         setVaultStatus('', '');
     }
 
     // =====================================================
-    // SAVE / KAYIT YÖNETİMİ
+    // SAVE SLOT MANAGEMENT
     // =====================================================
     function loadSaves() {
         const savedData = localStorage.getItem(LS_SAVES);
         if (savedData) {
             try {
-                const parsed = JSON.parse(savedData);
-                state.saves = parsed.saves || { 'save1': [] };
+                const parsed     = JSON.parse(savedData);
+                state.saves      = parsed.saves       || { 'save1': [] };
                 state.currentSave = parsed.currentSave || 'save1';
-            } catch (e) {
-                console.warn('Save datası okunamadı, sıfırlanıyor...');
+            } catch {
+                console.warn('Could not read save data — resetting.');
             }
         }
         updateSaveUI();
     }
 
-    function saveSaves() {
+    function persistSaves() {
         localStorage.setItem(LS_SAVES, JSON.stringify({
-            saves: state.saves,
-            currentSave: state.currentSave
+            saves:       state.saves,
+            currentSave: state.currentSave,
         }));
         updateSaveUI();
     }
@@ -337,97 +338,95 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSaveUI() {
         saveSelector.innerHTML = '';
         Object.keys(state.saves).forEach(saveName => {
-            const opt = document.createElement('option');
-            opt.value = saveName;
-            opt.textContent = saveName === 'save1' ? 'Kayıt 1 (Ana)' : `Kayıt ${saveName.replace('save', '')}`;
+            const opt        = document.createElement('option');
+            opt.value        = saveName;
+            opt.textContent  = saveName === 'save1'
+                ? 'Save 1 (Main)'
+                : `Save ${saveName.replace('save', '')}`;
             if (saveName === state.currentSave) opt.selected = true;
             saveSelector.appendChild(opt);
         });
 
-        const hiddenArray = state.saves[state.currentSave] || [];
-        hiddenCount.textContent = hiddenArray.length;
+        const hiddenIds = state.saves[state.currentSave] || [];
+        hiddenCount.textContent = hiddenIds.length;
     }
 
     // =====================================================
-    // MENÜ OLUŞTURMA
+    // MENU BUILDER (accordion)
     // =====================================================
-    function buildMenuOptimized(data) {
-        const folderIcon = `<svg class="accordion-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
-        const playIconSm = `<svg class="question-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 18 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+    function buildMenu(data) {
+        const chevronIcon = `<svg class="accordion-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+        const playIcon    = `<svg class="question-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 18 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
 
-        let htmlString = '';
+        let html = '';
 
-        data.forEach(ders => {
-            htmlString += `<div class="accordion-item level-1">
+        data.forEach(course => {
+            html += `<div class="accordion-item level-1">
                 <button class="accordion-header" aria-expanded="false">
-                    <span>${ders.baslik}</span>
-                    ${folderIcon}
+                    <span>${course.title}</span>
+                    ${chevronIcon}
                 </button>
                 <div class="accordion-content">`;
 
-            if (ders.uniteListesi) {
-                ders.uniteListesi.forEach(unite => {
-                    htmlString += `<div class="accordion-item level-2">
+            (course.units || []).forEach(unit => {
+                html += `<div class="accordion-item level-2">
+                    <button class="accordion-header" aria-expanded="false">
+                        <span>${unit.title}</span>
+                        ${chevronIcon}
+                    </button>
+                    <div class="accordion-content">`;
+
+                (unit.tests || []).forEach(test => {
+                    html += `<div class="accordion-item level-3">
                         <button class="accordion-header" aria-expanded="false">
-                            <span>${unite.baslik}</span>
-                            ${folderIcon}
+                            <span>${test.title}</span>
+                            ${chevronIcon}
                         </button>
                         <div class="accordion-content">`;
 
-                    if (unite.testListesi) {
-                        unite.testListesi.forEach(test => {
-                            htmlString += `<div class="accordion-item level-3">
-                                <button class="accordion-header" aria-expanded="false">
-                                    <span>${test.baslik}</span>
-                                    ${folderIcon}
-                                </button>
-                                <div class="accordion-content">`;
+                    (test.questions || []).forEach(question => {
+                        const breadcrumb = `${course.title} > ${unit.title} > ${test.title} > ${question.title}`;
+                        html += `<div class="level-4">
+                            <button class="question-item"
+                                data-id="${question.id}"
+                                data-src="${question.video}"
+                                data-title="${breadcrumb}">
+                                ${playIcon}
+                                <span>${question.title}</span>
+                            </button>
+                        </div>`;
+                    });
 
-                            if (test.soruListesi) {
-                                test.soruListesi.forEach(soru => {
-                                    htmlString += `
-                                    <div class="level-4">
-                                        <button class="question-item" data-id="${soru.id}" data-src="${soru.video}" data-title="${ders.baslik} > ${unite.baslik} > ${test.baslik} > ${soru.baslik}">
-                                            ${playIconSm}
-                                            <span>${soru.baslik}</span>
-                                        </button>
-                                    </div>`;
-                                });
-                            }
-
-                            htmlString += `</div></div>`;
-                        });
-                    }
-
-                    htmlString += `</div></div>`;
+                    html += `</div></div>`;
                 });
-            }
 
-            htmlString += `</div></div>`;
+                html += `</div></div>`;
+            });
+
+            html += `</div></div>`;
         });
 
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlString;
-
+        // Use a document fragment for a single, efficient DOM insertion
+        const tempDiv  = document.createElement('div');
+        tempDiv.innerHTML = html;
         const fragment = document.createDocumentFragment();
         while (tempDiv.firstChild) {
             fragment.appendChild(tempDiv.firstChild);
         }
-
         menuContainer.appendChild(fragment);
     }
 
     function buildCourseFilters(data) {
         courseFilters.innerHTML = '';
-        data.forEach(ders => {
-            const label = document.createElement('label');
+        data.forEach(course => {
+            const label    = document.createElement('label');
             label.className = 'filter-label';
 
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'filter-checkbox';
-            checkbox.value = ders.id;
-            checkbox.checked = true;
+            const checkbox       = document.createElement('input');
+            checkbox.type        = 'checkbox';
+            checkbox.className   = 'filter-checkbox';
+            checkbox.value       = course.id;
+            checkbox.checked     = true;
 
             checkbox.addEventListener('change', () => {
                 buildReviewPool();
@@ -435,53 +434,47 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(ders.baslik));
+            label.appendChild(document.createTextNode(course.title));
             courseFilters.appendChild(label);
         });
     }
 
     // =====================================================
-    // OLAY DİNLEYİCİLERİ
+    // EVENT LISTENERS
     // =====================================================
-
-    // Event delegation çeşitli kez kurulmasın diye flag tutuyoruz
-    let delegationSetup = false;
-
     function setupEventDelegation() {
         if (delegationSetup) return;
         delegationSetup = true;
 
         menuContainer.addEventListener('click', (e) => {
-            const headerBtn = e.target.closest('.accordion-header');
-            if (headerBtn) { toggleAccordion(headerBtn); return; }
+            const headerBtn   = e.target.closest('.accordion-header');
+            if (headerBtn)   { toggleAccordion(headerBtn); return; }
 
             const questionBtn = e.target.closest('.question-item');
-            if (questionBtn) { playVideo(questionBtn); return; }
+            if (questionBtn) { playVideo(questionBtn); }
         });
     }
-
-    let modeListenersSetup = false;
 
     function setupModeEventListeners() {
         if (modeListenersSetup) return;
         modeListenersSetup = true;
 
         tabLibrary.addEventListener('click', () => switchMode('library'));
-        tabReview.addEventListener('click', () => switchMode('review'));
+        tabReview.addEventListener('click',  () => switchMode('review'));
 
         saveSelector.addEventListener('change', (e) => {
             state.currentSave = e.target.value;
-            saveSaves();
+            persistSaves();
             buildReviewPool();
             loadRandomQuestion();
         });
 
         newSaveBtn.addEventListener('click', () => {
-            const saveCount = Object.keys(state.saves).length + 1;
-            const newSaveName = `save${saveCount}`;
+            const newIndex   = Object.keys(state.saves).length + 1;
+            const newSaveName = `save${newIndex}`;
             state.saves[newSaveName] = [];
-            state.currentSave = newSaveName;
-            saveSaves();
+            state.currentSave        = newSaveName;
+            persistSaves();
             buildReviewPool();
             loadRandomQuestion();
         });
@@ -492,16 +485,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        showSolutionBtn.addEventListener('click', showReviewSolution);
-        nextQuestionBtn.addEventListener('click', loadRandomQuestion);
-        hideQuestionBtn.addEventListener('click', hideCurrentQuestion);
+        showSolutionBtn.addEventListener('click',  showReviewSolution);
+        nextQuestionBtn.addEventListener('click',  loadRandomQuestion);
+        hideQuestionBtn.addEventListener('click',  hideCurrentQuestion);
     }
 
     // =====================================================
-    // MOD GEÇİŞİ
+    // MODE SWITCHING
     // =====================================================
     function switchMode(mode) {
         state.currentMode = mode;
+
         if (mode === 'library') {
             tabLibrary.classList.add('active');
             tabReview.classList.remove('active');
@@ -510,13 +504,11 @@ document.addEventListener('DOMContentLoaded', () => {
             libraryInfo.classList.remove('hidden');
             reviewInfo.classList.add('hidden');
 
-            if (state.activeQuestionId) {
-                solutionPlayer.classList.add('active');
-                videoPlaceholder.classList.add('hidden');
-            } else {
-                solutionPlayer.classList.remove('active');
-                videoPlaceholder.classList.remove('hidden');
-            }
+            // Show the player only if a question was previously selected
+            const hasActiveQuestion = Boolean(state.activeQuestionId);
+            solutionPlayer.classList.toggle('active', hasActiveQuestion);
+            videoPlaceholder.classList.toggle('hidden', hasActiveQuestion);
+
         } else {
             tabReview.classList.add('active');
             tabLibrary.classList.remove('active');
@@ -535,27 +527,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // TEKRAR MODU
+    // REVIEW MODE
     // =====================================================
     function buildReviewPool() {
         state.reviewPool = [];
+
         const hiddenIds = state.saves[state.currentSave] || [];
-        const selectedCourses = Array.from(
+        const selectedCourseIds = Array.from(
             document.querySelectorAll('.filter-checkbox:checked')
         ).map(cb => cb.value);
 
-        state.data.forEach(ders => {
-            if (!selectedCourses.includes(ders.id)) return;
-            if (!ders.uniteListesi) return;
-            ders.uniteListesi.forEach(unite => {
-                if (!unite.testListesi) return;
-                unite.testListesi.forEach(test => {
-                    if (!test.soruListesi) return;
-                    test.soruListesi.forEach(soru => {
-                        if (!hiddenIds.includes(soru.id)) {
+        state.data.forEach(course => {
+            if (!selectedCourseIds.includes(course.id)) return;
+            (course.units || []).forEach(unit => {
+                (unit.tests || []).forEach(test => {
+                    (test.questions || []).forEach(question => {
+                        if (!hiddenIds.includes(question.id)) {
                             state.reviewPool.push({
-                                ...soru,
-                                path: `${ders.baslik} > ${unite.baslik} > ${test.baslik}`
+                                ...question,
+                                path: `${course.title} > ${unit.title} > ${test.title}`,
                             });
                         }
                     });
@@ -563,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Karıştır (Fisher-Yates)
+        // Shuffle using the Fisher-Yates algorithm
         for (let i = state.reviewPool.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [state.reviewPool[i], state.reviewPool[j]] = [state.reviewPool[j], state.reviewPool[i]];
@@ -571,60 +561,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadRandomQuestion() {
-        reviewFeedback.className = 'feedback-message hidden';
-        reviewFeedback.innerHTML = '';
+        // Reset answer UI state
+        reviewFeedback.className  = 'feedback-message hidden';
+        reviewFeedback.innerHTML  = '';
         showSolutionBtn.classList.add('hidden');
         answerButtons.forEach(btn => {
             btn.classList.remove('selected', 'correct', 'wrong');
             btn.disabled = false;
         });
 
+        // Reset video
         solutionPlayer.pause();
         solutionPlayer.classList.remove('active');
         videoPlaceholder.classList.remove('hidden');
 
+        // Reset image
         reviewImageContainer.classList.add('hidden');
         reviewQuestionImage.src = '';
 
         if (state.reviewPool.length === 0) {
-            reviewQuestionTitle.textContent = 'Gösterilecek Soru Kalmadı!';
-            reviewQuestionPath.textContent = 'Tüm soruları gizlediniz veya havuz boş.';
-            state.currentReviewQuestion = null;
+            reviewQuestionTitle.textContent = 'No Questions Left!';
+            reviewQuestionPath.textContent  = 'All questions are hidden or the pool is empty.';
+            state.currentReviewQuestion     = null;
             return;
         }
 
-        const q = state.reviewPool.pop();
-        state.currentReviewQuestion = q;
+        const question = state.reviewPool.pop();
+        state.currentReviewQuestion = question;
 
-        reviewQuestionTitle.textContent = q.baslik;
-        reviewQuestionPath.textContent = q.path;
+        reviewQuestionTitle.textContent = question.title;
+        reviewQuestionPath.textContent  = question.path;
 
-        if (q.resim) {
-            reviewQuestionImage.src = q.resim;
+        if (question.image) {
+            reviewQuestionImage.src = question.image;
             reviewImageContainer.classList.remove('hidden');
         }
     }
 
-    function handleAnswer(answer, btn) {
+    function handleAnswer(selectedAnswer, clickedBtn) {
         if (!state.currentReviewQuestion) return;
 
+        // Lock all answer buttons
         answerButtons.forEach(b => (b.disabled = true));
-        btn.classList.add('selected');
+        clickedBtn.classList.add('selected');
 
-        const q = state.currentReviewQuestion;
-        if (!q.cevap) {
-            reviewFeedback.textContent = 'Bu sorunun kayıtlı bir cevabı yok. Lütfen çözümü izleyerek kontrol edin.';
-            reviewFeedback.className = 'feedback-message info';
-        } else if (q.cevap === answer) {
-            reviewFeedback.textContent = 'Tebrikler, Doğru Cevap!';
-            reviewFeedback.className = 'feedback-message success';
-            btn.classList.add('correct');
+        const question = state.currentReviewQuestion;
+
+        if (!question.answer) {
+            reviewFeedback.textContent = 'No answer recorded for this question. Watch the solution to check.';
+            reviewFeedback.className   = 'feedback-message info';
+        } else if (question.answer === selectedAnswer) {
+            reviewFeedback.textContent = 'Correct!';
+            reviewFeedback.className   = 'feedback-message success';
+            clickedBtn.classList.add('correct');
         } else {
-            reviewFeedback.textContent = `Yanlış Cevap. Doğru cevap: ${q.cevap}`;
-            reviewFeedback.className = 'feedback-message error';
-            btn.classList.add('wrong');
+            reviewFeedback.textContent = `Wrong. The correct answer is: ${question.answer}`;
+            reviewFeedback.className   = 'feedback-message error';
+            clickedBtn.classList.add('wrong');
+            // Highlight the correct answer
             answerButtons.forEach(b => {
-                if (b.getAttribute('data-answer') === q.cevap) b.classList.add('correct');
+                if (b.getAttribute('data-answer') === question.answer) {
+                    b.classList.add('correct');
+                }
             });
         }
 
@@ -636,61 +634,61 @@ document.addEventListener('DOMContentLoaded', () => {
         videoPlaceholder.classList.add('hidden');
         solutionPlayer.classList.add('active');
         solutionPlayer.src = state.currentReviewQuestion.video;
-        solutionPlayer.play().catch(e => console.warn('Otomatik oynatma engellendi:', e));
+        solutionPlayer.play().catch(e => console.warn('Autoplay blocked:', e));
     }
 
     function hideCurrentQuestion() {
         if (!state.currentReviewQuestion) return;
-        const qId = state.currentReviewQuestion.id;
-        if (!state.saves[state.currentSave].includes(qId)) {
-            state.saves[state.currentSave].push(qId);
-            saveSaves();
+        const questionId = state.currentReviewQuestion.id;
+        if (!state.saves[state.currentSave].includes(questionId)) {
+            state.saves[state.currentSave].push(questionId);
+            persistSaves();
         }
         loadRandomQuestion();
     }
 
     // =====================================================
-    // AKORDEON VE VİDEO
+    // ACCORDION & VIDEO PLAYER
     // =====================================================
     function toggleAccordion(headerBtn) {
-        const content = headerBtn.nextElementSibling;
+        const content    = headerBtn.nextElementSibling;
         const isExpanded = headerBtn.getAttribute('aria-expanded') === 'true';
 
         if (isExpanded) {
             headerBtn.setAttribute('aria-expanded', 'false');
             content.style.maxHeight = null;
-            content.style.opacity = '0';
+            content.style.opacity   = '0';
         } else {
             headerBtn.setAttribute('aria-expanded', 'true');
             content.style.maxHeight = content.scrollHeight + 300 + 'px';
-            content.style.opacity = '1';
+            content.style.opacity   = '1';
         }
     }
 
     function playVideo(btn) {
+        // Deactivate the previously selected question
         const prevActive = document.querySelector('.question-item.active');
         if (prevActive) prevActive.classList.remove('active');
-
         btn.classList.add('active');
 
-        const videoSrc = btn.getAttribute('data-src');
+        const videoSrc     = btn.getAttribute('data-src');
         const questionTitle = btn.getAttribute('data-title');
         state.activeQuestionId = btn.getAttribute('data-id');
 
         videoPlaceholder.classList.add('hidden');
         solutionPlayer.classList.add('active');
 
-        videoTitle.textContent = questionTitle;
-        videoPathText.textContent = `Dosya: ${videoSrc}`;
+        videoTitle.textContent   = questionTitle;
+        videoPathText.textContent = `File: ${videoSrc}`;
 
         solutionPlayer.src = videoSrc;
         solutionPlayer.play().catch(error => {
-            console.warn('Otomatik oynatma tarayıcı tarafından engellendi:', error);
+            console.warn('Autoplay blocked by browser:', error);
         });
     }
 
     // =====================================================
-    // BAŞLAT
+    // START
     // =====================================================
     init();
 });

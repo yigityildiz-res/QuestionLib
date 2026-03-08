@@ -1,18 +1,17 @@
 @echo off
-title YKS Soru Çözüm Havuzu
+title Question Library
 color 0B
 
 echo ===================================================
-echo YKS Soru Cozum Havuzu Lokal Sunucusu Baslatiliyor...
+echo  Question Library - Local Server Starting...
 echo ===================================================
 echo.
-echo Lutfen tarayicinizdan su adrese gidin:
+echo Open your browser and navigate to:
 echo http://localhost:8000
 echo.
 echo ---------------------------------------------------
-echo SUNUCUYU DURDURMAK ICIN:
-echo Bu siyah pencereyi (CMD) kapatmaniz yeterlidir.
-echo Yada pencere icindeyken CTRL + C tuslarina basabilirsiniz.
+echo TO STOP THE SERVER:
+echo Close this window (CMD), or press CTRL+C inside it.
 echo ---------------------------------------------------
 echo.
 

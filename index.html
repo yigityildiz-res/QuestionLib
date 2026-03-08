@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YKS Soru Çözüm Havuzu</title>
-    <meta name="description" content="Kişisel YKS Video Çözüm Kütüphanesi">
+    <title>Question Library</title>
+    <meta name="description" content="Personal Video Solution Library">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-    <!-- ===== 1. KASA SEÇİM EKRANI ===== -->
+    <!-- ===== 1. VAULT SELECTION SCREEN ===== -->
     <div id="vault-screen">
         <div class="vault-card">
             <div class="vault-logo">
@@ -22,38 +22,38 @@
                     </path>
                 </svg>
             </div>
-            <h1 class="vault-title">Soru Çözüm Havuzu</h1>
-            <p class="vault-subtitle">Video kasanızı seçerek başlayın.</p>
+            <h1 class="vault-title">Question Library</h1>
+            <p class="vault-subtitle">Select a video vault to get started.</p>
 
-            <!-- Yeni Kasa Ekle -->
+            <!-- Add New Vault -->
             <div class="vault-input-group">
-                <label for="vault-path-input" class="vault-label">Kasa Klasör Yolu</label>
+                <label for="vault-path-input" class="vault-label">Vault Folder Path</label>
                 <div class="vault-input-row">
                     <input id="vault-path-input" type="text" class="vault-input"
-                        placeholder="Örn: C:\Videolar\YKS_Arsiv" autocomplete="off" spellcheck="false" />
-                    <button id="vault-browse-btn" class="btn btn-secondary" title="Klasör Seç">
+                        placeholder="e.g. C:\Videos\MyVault" autocomplete="off" spellcheck="false" />
+                    <button id="vault-browse-btn" class="btn btn-secondary" title="Browse Folder">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                         </svg>
-                        Gözat
+                        Browse
                     </button>
-                    <button id="vault-open-btn" class="btn btn-primary">Aç</button>
+                    <button id="vault-open-btn" class="btn btn-primary">Open</button>
                 </div>
             </div>
 
-            <!-- Kaydedilmiş Kasalar -->
+            <!-- Saved Vaults -->
             <div id="saved-vaults-section" class="saved-vaults-section hidden">
-                <h3 class="saved-vaults-title">Kayıtlı Kasalar</h3>
+                <h3 class="saved-vaults-title">Recent Vaults</h3>
                 <ul id="saved-vaults-list" class="saved-vaults-list"></ul>
             </div>
 
-            <!-- Yükleme / Hata Durumu -->
+            <!-- Loading / Error Status -->
             <div id="vault-status" class="vault-status hidden"></div>
         </div>
     </div>
 
-    <!-- ===== 2. HATA EKRANI ===== -->
+    <!-- ===== 2. ERROR SCREEN ===== -->
     <div id="error-screen" class="hidden">
         <div class="error-content">
             <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -61,24 +61,24 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <h2 id="error-title">Sistem Hatası</h2>
-            <p id="error-message">Hata mesajı burada görünecek.</p>
-            <button id="error-back-btn" class="btn btn-secondary" style="margin-top:1.5rem;">← Kasaya Dön</button>
+            <h2 id="error-title">System Error</h2>
+            <p id="error-message">Error details will appear here.</p>
+            <button id="error-back-btn" class="btn btn-secondary" style="margin-top:1.5rem;">← Back to Vault</button>
         </div>
     </div>
 
-    <!-- ===== 3. ANA UYGULAMA ===== -->
+    <!-- ===== 3. MAIN APPLICATION ===== -->
     <div id="app" class="app-container hidden">
 
-        <!-- Sol Menü (Akordeon) -->
+        <!-- Left Sidebar (Accordion Menu) -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-header-top">
                     <div>
-                        <h1>Soru Kütüphanesi</h1>
+                        <h1>Question Library</h1>
                         <p id="active-vault-label" class="active-vault-label">—</p>
                     </div>
-                    <button id="change-vault-btn" class="btn-icon" title="Kasa Değiştir">
+                    <button id="change-vault-btn" class="btn-icon" title="Change Vault">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z">
@@ -87,46 +87,46 @@
                     </button>
                 </div>
                 <div class="tabs">
-                    <button id="tab-library" class="tab-btn active">Kütüphane</button>
-                    <button id="tab-review" class="tab-btn">Tekrar</button>
+                    <button id="tab-library" class="tab-btn active">Library</button>
+                    <button id="tab-review" class="tab-btn">Review</button>
                 </div>
             </div>
 
-            <!-- Kütüphane Gösterimi -->
+            <!-- Library View -->
             <div id="sidebar-library" class="sidebar-view active">
                 <nav id="menu-container" class="menu-container">
-                    <!-- Menü elemanları JS ile buraya yüklenecek -->
+                    <!-- Menu items are injected here by JavaScript -->
                 </nav>
             </div>
 
-            <!-- Tekrar Gösterimi -->
+            <!-- Review View -->
             <div id="sidebar-review" class="sidebar-view hidden">
                 <div class="save-manager">
-                    <h3>Kayıt Düzeyleri</h3>
+                    <h3>Save Slots</h3>
                     <select id="save-selector" class="save-selector">
-                        <option value="save1">Kayıt 1</option>
+                        <option value="save1">Save 1</option>
                     </select>
-                    <button id="new-save-btn" class="btn btn-secondary">Yeni Kayıt Aç</button>
-                    <p class="stats">Gizlenen Soru: <span id="hidden-count">0</span></p>
+                    <button id="new-save-btn" class="btn btn-secondary">New Save</button>
+                    <p class="stats">Hidden Questions: <span id="hidden-count">0</span></p>
                 </div>
 
                 <div class="filter-manager">
-                    <h3>Ders Seçimi</h3>
+                    <h3>Filter by Course</h3>
                     <div id="course-filters" class="course-filters">
-                        <!-- Filtreler JS ile buraya yüklenecek -->
+                        <!-- Filter checkboxes are injected here by JavaScript -->
                     </div>
                 </div>
             </div>
         </aside>
 
-        <!-- Sağ İçerik (Video Oynatıcı) -->
+        <!-- Right Content Area (Video Player) -->
         <main class="main-content">
             <div class="video-container">
                 <div class="video-wrapper">
                     <video id="solution-player" controls preload="metadata">
-                        Tarayıcınız video oynatıcıyı desteklemiyor.
+                        Your browser does not support the video player.
                     </video>
-                    <!-- Seçim yapılmadığında gösterilecek yer tutucu -->
+                    <!-- Placeholder shown when no question is selected -->
                     <div id="video-placeholder" class="video-placeholder">
                         <div class="placeholder-content">
                             <svg class="play-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -137,29 +137,29 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <p>Çözümünü izlemek için soldaki menüden bir soru seçin.</p>
-                            <h3 id="current-question-title" class="hidden">Soru Başlığı</h3>
+                            <p>Select a question from the menu to watch its solution.</p>
+                            <h3 id="current-question-title" class="hidden">Question Title</h3>
                         </div>
                     </div>
                 </div>
                 <div id="library-info" class="video-info active">
-                    <h2 id="video-title">Soru Çözümü</h2>
-                    <p id="video-path-text">Seçim bekleniyor...</p>
+                    <h2 id="video-title">Question Solution</h2>
+                    <p id="video-path-text">Waiting for selection...</p>
                 </div>
 
-                <!-- Tekrar Modu İçeriği -->
+                <!-- Review Mode Content -->
                 <div id="review-info" class="review-info hidden">
                     <div class="review-header">
-                        <h2 id="review-question-title">Soru Yükleniyor...</h2>
-                        <p id="review-question-path" class="text-secondary">Seçim bekleniyor...</p>
+                        <h2 id="review-question-title">Loading question...</h2>
+                        <p id="review-question-path" class="text-secondary">Waiting for selection...</p>
                     </div>
 
                     <div id="review-image-container" class="review-image-container hidden">
-                        <img id="review-question-image" src="" alt="Soru Görseli">
+                        <img id="review-question-image" src="" alt="Question Image">
                     </div>
 
                     <div class="answer-section">
-                        <h3>Cevabınızı Seçin:</h3>
+                        <h3>Select Your Answer:</h3>
                         <div class="answer-buttons">
                             <button class="answer-btn" data-answer="A">A</button>
                             <button class="answer-btn" data-answer="B">B</button>
@@ -171,9 +171,9 @@
                     </div>
 
                     <div class="review-actions">
-                        <button id="show-solution-btn" class="btn btn-primary hidden">Çözümü İzle</button>
-                        <button id="next-question-btn" class="btn btn-primary">Sonraki Soru</button>
-                        <button id="hide-question-btn" class="btn btn-danger">Bu Soruyu Bir Daha Gösterme</button>
+                        <button id="show-solution-btn" class="btn btn-primary hidden">Watch Solution</button>
+                        <button id="next-question-btn" class="btn btn-primary">Next Question</button>
+                        <button id="hide-question-btn" class="btn btn-danger">Don't Show This Again</button>
                     </div>
                 </div>
             </div>
