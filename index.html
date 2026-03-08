@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YKS Soru Çözüm Havuzu</title>
+    <meta name="description" content="Kişisel YKS Video Çözüm Kütüphanesi">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- ===== 1. KASA SEÇİM EKRANI ===== -->
+    <div id="vault-screen">
+        <div class="vault-card">
+            <div class="vault-logo">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+            </div>
+            <h1 class="vault-title">Soru Çözüm Havuzu</h1>
+            <p class="vault-subtitle">Video kasanızı seçerek başlayın.</p>
+
+            <!-- Yeni Kasa Ekle -->
+            <div class="vault-input-group">
+                <label for="vault-path-input" class="vault-label">Kasa Klasör Yolu</label>
+                <div class="vault-input-row">
+                    <input id="vault-path-input" type="text" class="vault-input"
+                        placeholder="Örn: C:\Videolar\YKS_Arsiv" autocomplete="off" spellcheck="false" />
+                    <button id="vault-browse-btn" class="btn btn-secondary" title="Klasör Seç">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        Gözat
+                    </button>
+                    <button id="vault-open-btn" class="btn btn-primary">Aç</button>
+                </div>
+            </div>
+
+            <!-- Kaydedilmiş Kasalar -->
+            <div id="saved-vaults-section" class="saved-vaults-section hidden">
+                <h3 class="saved-vaults-title">Kayıtlı Kasalar</h3>
+                <ul id="saved-vaults-list" class="saved-vaults-list"></ul>
+            </div>
+
+            <!-- Yükleme / Hata Durumu -->
+            <div id="vault-status" class="vault-status hidden"></div>
+        </div>
+    </div>
+
+    <!-- ===== 2. HATA EKRANI ===== -->
+    <div id="error-screen" class="hidden">
+        <div class="error-content">
+            <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2 id="error-title">Sistem Hatası</h2>
+            <p id="error-message">Hata mesajı burada görünecek.</p>
+            <button id="error-back-btn" class="btn btn-secondary" style="margin-top:1.5rem;">← Kasaya Dön</button>
+        </div>
+    </div>
+
+    <!-- ===== 3. ANA UYGULAMA ===== -->
+    <div id="app" class="app-container hidden">
+
+        <!-- Sol Menü (Akordeon) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-header-top">
+                    <div>
+                        <h1>Soru Kütüphanesi</h1>
+                        <p id="active-vault-label" class="active-vault-label">—</p>
+                    </div>
+                    <button id="change-vault-btn" class="btn-icon" title="Kasa Değiştir">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="tabs">
+                    <button id="tab-library" class="tab-btn active">Kütüphane</button>
+                    <button id="tab-review" class="tab-btn">Tekrar</button>
+                </div>
+            </div>
+
+            <!-- Kütüphane Gösterimi -->
+            <div id="sidebar-library" class="sidebar-view active">
+                <nav id="menu-container" class="menu-container">
+                    <!-- Menü elemanları JS ile buraya yüklenecek -->
+                </nav>
+            </div>
+
+            <!-- Tekrar Gösterimi -->
+            <div id="sidebar-review" class="sidebar-view hidden">
+                <div class="save-manager">
+                    <h3>Kayıt Düzeyleri</h3>
+                    <select id="save-selector" class="save-selector">
+                        <option value="save1">Kayıt 1</option>
+                    </select>
+                    <button id="new-save-btn" class="btn btn-secondary">Yeni Kayıt Aç</button>
+                    <p class="stats">Gizlenen Soru: <span id="hidden-count">0</span></p>
+                </div>
+
+                <div class="filter-manager">
+                    <h3>Ders Seçimi</h3>
+                    <div id="course-filters" class="course-filters">
+                        <!-- Filtreler JS ile buraya yüklenecek -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sağ İçerik (Video Oynatıcı) -->
+        <main class="main-content">
+            <div class="video-container">
+                <div class="video-wrapper">
+                    <video id="solution-player" controls preload="metadata">
+                        Tarayıcınız video oynatıcıyı desteklemiyor.
+                    </video>
+                    <!-- Seçim yapılmadığında gösterilecek yer tutucu -->
+                    <div id="video-placeholder" class="video-placeholder">
+                        <div class="placeholder-content">
+                            <svg class="play-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p>Çözümünü izlemek için soldaki menüden bir soru seçin.</p>
+                            <h3 id="current-question-title" class="hidden">Soru Başlığı</h3>
+                        </div>
+                    </div>
+                </div>
+                <div id="library-info" class="video-info active">
+                    <h2 id="video-title">Soru Çözümü</h2>
+                    <p id="video-path-text">Seçim bekleniyor...</p>
+                </div>
+
+                <!-- Tekrar Modu İçeriği -->
+                <div id="review-info" class="review-info hidden">
+                    <div class="review-header">
+                        <h2 id="review-question-title">Soru Yükleniyor...</h2>
+                        <p id="review-question-path" class="text-secondary">Seçim bekleniyor...</p>
+                    </div>
+
+                    <div id="review-image-container" class="review-image-container hidden">
+                        <img id="review-question-image" src="" alt="Soru Görseli">
+                    </div>
+
+                    <div class="answer-section">
+                        <h3>Cevabınızı Seçin:</h3>
+                        <div class="answer-buttons">
+                            <button class="answer-btn" data-answer="A">A</button>
+                            <button class="answer-btn" data-answer="B">B</button>
+                            <button class="answer-btn" data-answer="C">C</button>
+                            <button class="answer-btn" data-answer="D">D</button>
+                            <button class="answer-btn" data-answer="E">E</button>
+                        </div>
+                        <div id="review-feedback" class="feedback-message hidden"></div>
+                    </div>
+
+                    <div class="review-actions">
+                        <button id="show-solution-btn" class="btn btn-primary hidden">Çözümü İzle</button>
+                        <button id="next-question-btn" class="btn btn-primary">Sonraki Soru</button>
+                        <button id="hide-question-btn" class="btn btn-danger">Bu Soruyu Bir Daha Gösterme</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
